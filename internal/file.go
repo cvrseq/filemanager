@@ -1,34 +1,41 @@
 package file
 
 import (
+	"os"
 	"time"
 )
-type Object struct { 
+
+type Object struct {
 	file *File
-	dir *Directory
+	dir  *Directory
 }
 
-type Directory struct { 
-	name string
-	writes string
+type Directory struct {
+	name      string
+	writes    string
 	filenames string
 }
 
-type Metadata struct { 
+type Metadata struct {
 	filename string
-	size uint64
-	kind *Object
+	size     uint64
+	kind     *Object
 }
 
-type File struct { 
-	name string
-	size uint64
+type File struct {
+	name        string
+	size        uint64
 	permissions string
-	owner string
-	created_at time.Time
-	metadata *Metadata
+	owner       string
+	created_at  time.Time
+	metadata    *Metadata
 }
 
-func Create(object string) bool {
-	return true 
+func Create(name string) (*os.File, error) {
+	file, err := os.Create(name)
+	if err != nil {
+		return nil, err
+	}
+	return file, err
 }
+

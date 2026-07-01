@@ -1,7 +1,13 @@
-package main 
+package main
 
-import "fmt" 
+import (
+	file "github.com/cvrseq/filemanager/internal"
+)
 
-func main() { 
-	fmt.Println("Hello World!") 
+func main() {
+	var name string
+	name = "test_file"
+
+	file.Create(name)
+
 }
