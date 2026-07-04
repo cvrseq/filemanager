@@ -36,6 +36,13 @@ func Create(name string) (*os.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	return file, err
+	return file, nil
 }
 
+func WriteFile(name string, data []byte, perm os.FileMode) error {
+	err := os.WriteFile(name, data, perm)
+	if err != nil {
+		return err
+	}
+	return nil
+}
