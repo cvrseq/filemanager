@@ -19,5 +19,6 @@ func main() {
 
 	file.Create(name)
 	file.WriteFile(name, data, perm)
+	file.Delete(name)
 
 }

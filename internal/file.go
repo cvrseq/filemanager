@@ -46,3 +46,12 @@ func WriteFile(name string, data []byte, perm os.FileMode) error {
 	}
 	return nil
 }
+
+func Delete(name string) error {
+	err := os.Remove(name)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
