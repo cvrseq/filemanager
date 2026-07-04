@@ -52,6 +52,13 @@ func Delete(name string) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
 
+func MakeDirectory(dirName string, perm os.FileMode) error {
+	err := os.Mkdir(dirName, perm)
+	if err != nil {
+		return err
+	}
 	return nil
 }

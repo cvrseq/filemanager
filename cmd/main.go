@@ -9,16 +9,20 @@ import (
 func main() {
 
 	var (
-		name string
-		data []byte
-		perm os.FileMode
+		dirName string
+		name    string
+		data    []byte
+		perm    os.FileMode
 	)
 
+	dirName = "test"
 	name = "test_file.txt "
 	data = []byte("hello world")
 	perm = os.FileMode(0644)
 
 	file.Create(name)
 	file.WriteFile(name, data, perm)
+	file.MakeDirectory(dirName, perm)
 	file.Delete(name)
+	file.Delete(dirName)
 }
