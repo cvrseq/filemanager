@@ -7,17 +7,18 @@ import (
 )
 
 func main() {
+
 	var (
 		name string
 		data []byte
 		perm os.FileMode
 	)
 
-	name = "test_file"
+	name = "test_file.txt "
 	data = []byte("hello world")
 	perm = os.FileMode(0644)
 
 	file.Create(name)
 	file.WriteFile(name, data, perm)
-
+	file.Delete(name)
 }
