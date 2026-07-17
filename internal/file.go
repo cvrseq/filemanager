@@ -1,15 +1,61 @@
 package file
 
 import (
+	"encoding/json"
+	"log"
+	"net/http"
 	"os"
 )
 
-func Create(name string) (*os.File, error) {
-	file, err := os.Create(name)
+type DirRequest struct {
+	Name string      `json:"name"`
+	Perm os.FileMode `json:"permission"`
+}
+
+type DirResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
+type FileRequest struct {
+	Name string `json:"name"`
+}
+
+type FileResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
+func CreateFileHandler(w http.ResponseWriter, r *http.Request) {
+	var req FileRequest
+	decodeHelperByCreateFile(&req, r)
+
+	err := Create(req.Name)
 	if err != nil {
-		return nil, err
+		log.Printf("Create failed: %v", err)
 	}
-	return file, nil
+
+	encodeHelperByCreateFile(w, r)
+}
+
+func CreateDirHandler(w http.ResponseWriter, r *http.Request) {
+	var req DirRequest
+	decodeHelperByMakeDirectory(&req, r)
+
+	err := MakeDirectory(req.Name, req.Perm)
+	if err != nil {
+		log.Printf("Make directory failed: %v", err)
+	}
+
+	encodeHelperByMakeDirectory(w, r)
+}
+
+func Create(name string) error {
+	_, err := os.Create(name)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func WriteFile(name string, data []byte, perm os.FileMode) error {
@@ -34,4 +80,38 @@ func MakeDirectory(dirName string, perm os.FileMode) error {
 		return err
 	}
 	return nil
+}
+
+func decodeHelperByMakeDirectory(req *DirRequest, r *http.Request) error {
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func encodeHelperByMakeDirectory(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	json.NewEncoder(w).Encode(DirResponse{
+		Status:  "created",
+		Message: "Make directory handler successed",
+	})
+}
+
+func decodeHelperByCreateFile(req *FileRequest, r *http.Request) error {
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func encodeHelperByCreateFile(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	json.NewEncoder(w).Encode(FileResponse{
+		Status:  "created",
+		Message: "Create file handler successed",
+	})
 }
