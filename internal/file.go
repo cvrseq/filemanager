@@ -7,6 +7,14 @@ import (
 	"os"
 )
 
+type FileInfo struct { 
+	Name string  `json:"name"`
+	Permission string `json:"perm"`
+	Data string `json:"data"`
+	Type string `json:"type"`
+	Size uint64 `json:"size"`
+}
+
 type DirRequest struct {
 	Name string      `json:"name"`
 	Perm os.FileMode `json:"permission"`
@@ -46,11 +54,12 @@ type CreateAndWriteResponse struct {
 	Message string `json:"message"`
 }
 
+
 func CreateFileHandler(w http.ResponseWriter, r *http.Request) {
 	var req FileRequest
 	decodeHelperByCreateFile(&req, r)
 
-	err := Create(req.Name)
+	_, err := os.Create(req.Name)
 	if err != nil {
 		log.Printf("Create failed: %v", err)
 	}
@@ -62,7 +71,7 @@ func CreateDirHandler(w http.ResponseWriter, r *http.Request) {
 	var req DirRequest
 	decodeHelperByMakeDirectory(&req, r)
 
-	err := MakeDirectory(req.Name, req.Perm)
+	err := os.Mkdir(req.Name, req.Perm)
 	if err != nil {
 		log.Printf("Make directory failed: %v", err)
 	}
@@ -74,7 +83,7 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	var req DeleteRequest
 	decodeHelperByDeleteFileOrDir(&req, r)
 
-	err := Delete(req.Name)
+	err := os.Remove(req.Name)
 	if err != nil {
 		log.Printf("Delete file or directory failed: %v", err)
 	}
@@ -85,44 +94,14 @@ func CreateAndWriteFileIfExistHandler(w http.ResponseWriter, r *http.Request) {
 	var req CreateAndWriteRequest
 	decodeHelperByCreateAndWrite(&req, r) 
 
-	err := WriteFile(req.Name, req.Data, req.Perm)
+	err := os.WriteFile(req.Name, req.Data, req.Perm)
 	if err != nil {
 		log.Printf("Write file failed: %v", err)
 	}
 	encodeHelperByCreateAndWrite(w, r)
 }
 
-func Create(name string) error {
-	_, err := os.Create(name)
-	if err != nil {
-		return err
-	}
-	return nil
-}
 
-func WriteFile(name string, data []byte, perm os.FileMode) error {
-	err := os.WriteFile(name, data, perm)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func Delete(name string) error {
-	err := os.Remove(name)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func MakeDirectory(dirName string, perm os.FileMode) error {
-	err := os.Mkdir(dirName, perm)
-	if err != nil {
-		return err
-	}
-	return nil
-}
 
 func decodeHelperByMakeDirectory(req *DirRequest, r *http.Request) error {
 	err := json.NewDecoder(r.Body).Decode(&req)
