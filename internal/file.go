@@ -26,6 +26,26 @@ type FileResponse struct {
 	Message string `json:"message"`
 }
 
+type DeleteRequest struct {
+	Name string `json:"name"`
+}
+
+type DeleteResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
+type CreateAndWriteRequest struct {
+	Name string `json:"name"`
+	Data []byte `json:"data"`
+	Perm os.FileMode `json:"permission"`
+}
+
+type CreateAndWriteResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
 func CreateFileHandler(w http.ResponseWriter, r *http.Request) {
 	var req FileRequest
 	decodeHelperByCreateFile(&req, r)
@@ -48,6 +68,28 @@ func CreateDirHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	encodeHelperByMakeDirectory(w, r)
+}
+
+func DeleteHandler(w http.ResponseWriter, r *http.Request) {
+	var req DeleteRequest
+	decodeHelperByDeleteFileOrDir(&req, r)
+
+	err := Delete(req.Name)
+	if err != nil {
+		log.Printf("Delete file or directory failed: %v", err)
+	}
+	encodeHelperByDeleteFileOrDir(w, r)
+}
+
+func CreateAndWriteFileIfExistHandler(w http.ResponseWriter, r *http.Request) { 
+	var req CreateAndWriteRequest
+	decodeHelperByCreateAndWrite(&req, r) 
+
+	err := WriteFile(req.Name, req.Data, req.Perm)
+	if err != nil {
+		log.Printf("Write file failed: %v", err)
+	}
+	encodeHelperByCreateAndWrite(w, r)
 }
 
 func Create(name string) error {
@@ -113,5 +155,39 @@ func encodeHelperByCreateFile(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(FileResponse{
 		Status:  "created",
 		Message: "Create file handler successed",
+	})
+}
+
+func decodeHelperByDeleteFileOrDir(req *DeleteRequest, r *http.Request) error {
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func encodeHelperByDeleteFileOrDir(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(204)
+	json.NewEncoder(w).Encode(DeleteResponse{
+		Status:  "Deleted",
+		Message: "Delete file handler successed",
+	})
+}
+
+func decodeHelperByCreateAndWrite(req *CreateAndWriteRequest, r *http.Request) error {
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func encodeHelperByCreateAndWrite(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(204)
+	json.NewEncoder(w).Encode(CreateAndWriteResponse{
+		Status:  "Created and writed",
+		Message: "Create and write file handler successed",
 	})
 }

@@ -25,6 +25,8 @@ func main() {
 
 	mux.HandleFunc("POST /create_file", file.CreateFileHandler)
 	mux.HandleFunc("POST /create_directory", file.CreateDirHandler)
+	mux.HandleFunc("POST /write_file", file.CreateAndWriteFileIfExistHandler)
+	mux.HandleFunc("DELETE /delete", file.DeleteHandler)
 
 	go func() {
 		log.Printf("Server starting on %s", srv.Addr)
